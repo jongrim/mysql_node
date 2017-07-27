@@ -5,6 +5,7 @@
   "author": "Jonathan Grim <jonjongrim@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "inquirer": "^3.2.1",
     "mysql2": "^1.3.6"
   }
 }
