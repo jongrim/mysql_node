@@ -1,22 +1,17 @@
 'use strict';
-const mysql = require('mysql2');
+const _ = require('lodash');
 const inquirer = require('inquirer');
+const mysql = require('mysql2');
+const config = require('./config.js');
+const isValidNumber = require('./utils.js').isValidNumber;
 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  database: 'bamazon'
-});
+const connection = mysql.createConnection(config);
 
 function getAllProducts() {
   return new Promise(function(resolve, reject) {
     connection.query('SELECT * FROM products', function(err, results, fields) {
-      if (err) throw err;
-      let columns = [];
-      fields.forEach(field => {
-        columns.push(field.name);
-      });
+      if (err) reject(err);
+      let columns = fields.map(field => field.name);
       console.log(...columns);
       results.forEach(row => {
         console.log(row.item_id, row.product_name, row.department_name, row.price, row.stock_quantity);
@@ -32,6 +27,10 @@ function checkItemQuantity(item_id, quantity) {
       'SELECT `stock_quantity`, `price` FROM `products` WHERE `item_id` = ?',
       [item_id],
       (err, results, fields) => {
+        if (err) return reject(err);
+        if (results.length === 0) {
+          return reject('No results!');
+        }
         if (results[0].stock_quantity >= quantity) {
           resolve({
             item_id: item_id,
@@ -61,13 +60,6 @@ function purchaseItem(item_id, purchaseQuantity, stockQuantity, price) {
       }
     );
   });
-}
-
-function isValidNumber(answer) {
-  let num = Number.parseInt(answer);
-  if (Number.isInteger(num) && !Number.isNaN(num)) {
-    return true;
-  }
 }
 
 function endConnection() {
