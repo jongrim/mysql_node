@@ -21,7 +21,7 @@ function viewProductSales() {
           reject(err);
         } else {
           let columns = fields.map(field => field.name);
-          columns.concat(['Total Profit']);
+          columns = columns.concat(['Total Profit']);
           let table = new Table({
             head: columns,
             colWidths: [12, 18, 18, 18, 18]

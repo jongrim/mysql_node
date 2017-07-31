@@ -1,6 +1,7 @@
 'use strict';
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
+const Table = require('cli-table');
 const config = require('./config.js');
 const isValidNumber = require('./utils.js').isValidNumber;
 
@@ -11,10 +12,21 @@ function viewProducts() {
     connection.query('SELECT * FROM products', (err, results, fields) => {
       if (err) throw err;
       let columns = fields.map(field => field.name);
-      console.log(...columns);
-      results.forEach(row => {
-        console.log(row.item_id, row.product_name, row.department_name, row.price, row.stock_quantity);
+      let table = new Table({
+        head: columns,
+        colWidths: [8, 15, 15, 8, 15, 15]
       });
+      results.forEach(row => {
+        table.push([
+          row.item_id,
+          row.product_name,
+          row.department_name,
+          row.price,
+          row.stock_quantity,
+          row.product_sales
+        ]);
+      });
+      console.log(table.toString());
     });
     resolve();
   });
@@ -51,8 +63,8 @@ function addInventory(item_id, quantity) {
 function addNewProduct({ product_name, department_name, price, stock_quantity } = {}) {
   return new Promise(function(resolve, reject) {
     connection.execute(
-      'INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES (?, ?, ?, ?)',
-      [product_name, department_name, price, stock_quantity],
+      'INSERT INTO products (product_name, department_name, price, stock_quantity, product_sales) VALUES (?, ?, ?, ?, ?)',
+      [product_name, department_name, price, stock_quantity, 0],
       function(err, results, fields) {
         if (err) throw err;
         resolve();
