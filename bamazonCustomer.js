@@ -12,7 +12,7 @@ function getAllProducts() {
     connection.query('SELECT * FROM products', function(err, results, fields) {
       if (err) reject(err);
       let columns = fields.map(field => field.name);
-      console.log(...columns);
+      console.log(...columns.slice(0, columns.length - 2));
       results.forEach(row => {
         console.log(row.item_id, row.product_name, row.department_name, row.price, row.stock_quantity);
         resolve(true);
@@ -49,13 +49,14 @@ function checkItemQuantity(item_id, quantity) {
 function purchaseItem(item_id, purchaseQuantity, stockQuantity, price) {
   return new Promise(function(resolve, reject) {
     let newQuant = stockQuantity - purchaseQuantity;
+    let purchaseTotal = (purchaseQuantity * parseFloat(price)).toFixed(2);
     connection.execute(
-      'UPDATE `products` SET `stock_quantity`= ? WHERE `item_id` = ?',
-      [newQuant, item_id],
+      'UPDATE products SET stock_quantity = ?, product_sales = product_sales + ? WHERE item_id = ?',
+      [newQuant, purchaseTotal, item_id],
       (err, results, fields) => {
         if (err) reject(err);
         let purchasePrice = (purchaseQuantity * parseFloat(price)).toFixed(2);
-        console.log(`${purchaseQuantity} items purchase for a total of $${purchasePrice}`);
+        console.log(`${purchaseQuantity} items purchased for a total of $${purchasePrice}`);
         resolve(true);
       }
     );
