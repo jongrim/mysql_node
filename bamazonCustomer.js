@@ -2,6 +2,7 @@
 const _ = require('lodash');
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+const Table = require('cli-table');
 const config = require('./config.js');
 const isValidNumber = require('./utils.js').isValidNumber;
 
@@ -12,11 +13,16 @@ function getAllProducts() {
     connection.query('SELECT * FROM products', function(err, results, fields) {
       if (err) reject(err);
       let columns = fields.map(field => field.name);
-      console.log(...columns.slice(0, columns.length - 2));
-      results.forEach(row => {
-        console.log(row.item_id, row.product_name, row.department_name, row.price, row.stock_quantity);
-        resolve(true);
+      columns = columns.slice(0, columns.length - 1);
+      let table = new Table({
+        head: columns,
+        colWidths: [12, 25, 25, 12, 18]
       });
+      results.forEach(row => {
+        table.push([row.item_id, row.product_name, row.department_name, row.price, row.stock_quantity]);
+      });
+      console.log(table.toString());
+      resolve(true);
     });
   });
 }
