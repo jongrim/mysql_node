@@ -5,4 +5,9 @@ function isValidNumber(answer) {
   }
 }
 
+function formatCurrency(num) {
+  return `$${num}`;
+}
+
 module.exports.isValidNumber = isValidNumber;
+module.exports.formatCurrency = formatCurrency;
